@@ -593,123 +593,136 @@ export const ns: InternalAPI<NSFull> = {
       runningScriptObj.title = typeof title === "string" ? title : wrapUserNode(title);
       runningScriptObj.tailProps?.rerender();
     },
-  nuke: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (server.hasAdminRights) {
-      helpers.log(ctx, () => `Already have root access to '${server.hostname}'.`);
+    nuke: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+  
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (server.hasAdminRights) {
+        helpers.log(ctx, () => `Already have root access to '${server.hostname}'.`);
+        return true;
+      }
+      if (!Player.hasProgram(CompletedProgramName.nuke)) {
+        helpers.log(ctx, () => "You do not have the NUKE.exe virus!");
+        return false;
+      }
+      if (server.openPortCount < server.numOpenPortsRequired) {
+        helpers.log(ctx, () => "Not enough ports opened to use NUKE.exe virus.");
+        return false;
+      }
+      server.hasAdminRights = true;
+      helpers.log(ctx, () => `Executed NUKE.exe virus on '${server.hostname}' to gain root access.`);
       return true;
-    }
-    if (!Player.hasProgram(CompletedProgramName.nuke)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the NUKE.exe virus!");
-    }
-    if (server.openPortCount < server.numOpenPortsRequired) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "Not enough ports opened to use NUKE.exe virus.");
-    }
-    server.hasAdminRights = true;
-    helpers.log(ctx, () => `Executed NUKE.exe virus on '${server.hostname}' to gain root access.`);
-    return true;
-  },
-  brutessh: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (!Player.hasProgram(CompletedProgramName.bruteSsh)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the BruteSSH.exe program!");
-    }
-    if (!server.sshPortOpen) {
-      helpers.log(ctx, () => `Executed BruteSSH.exe on '${server.hostname}' to open SSH port (22).`);
-      server.sshPortOpen = true;
-      ++server.openPortCount;
-    } else {
-      helpers.log(ctx, () => `SSH Port (22) already opened on '${server.hostname}'.`);
-    }
-    return true;
-  },
-  ftpcrack: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (!Player.hasProgram(CompletedProgramName.ftpCrack)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the FTPCrack.exe program!");
-    }
-    if (!server.ftpPortOpen) {
-      helpers.log(ctx, () => `Executed FTPCrack.exe on '${server.hostname}' to open FTP port (21).`);
-      server.ftpPortOpen = true;
-      ++server.openPortCount;
-    } else {
-      helpers.log(ctx, () => `FTP Port (21) already opened on '${server.hostname}'.`);
-    }
-    return true;
-  },
-  relaysmtp: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (!Player.hasProgram(CompletedProgramName.relaySmtp)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the relaySMTP.exe program!");
-    }
-    if (!server.smtpPortOpen) {
-      helpers.log(ctx, () => `Executed relaySMTP.exe on '${server.hostname}' to open SMTP port (25).`);
-      server.smtpPortOpen = true;
-      ++server.openPortCount;
-    } else {
-      helpers.log(ctx, () => `SMTP Port (25) already opened on '${server.hostname}'.`);
-    }
-    return true;
-  },
-  httpworm: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (!Player.hasProgram(CompletedProgramName.httpWorm)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the HTTPWorm.exe program!");
-    }
-    if (!server.httpPortOpen) {
-      helpers.log(ctx, () => `Executed HTTPWorm.exe on '${server.hostname}' to open HTTP port (80).`);
-      server.httpPortOpen = true;
-      ++server.openPortCount;
-    } else {
-      helpers.log(ctx, () => `HTTP Port (80) already opened on '${server.hostname}'.`);
-    }
-    return true;
-  },
-  sqlinject: (ctx) => (_hostname) => {
-    const hostname = helpers.string(ctx, "hostname", _hostname);
-    const server = helpers.getServer(ctx, hostname);
-    if (!(server instanceof Server)) {
-      helpers.log(ctx, () => "Cannot be executed on this server.");
-      return false;
-    }
-    if (!Player.hasProgram(CompletedProgramName.sqlInject)) {
-      throw helpers.makeRuntimeErrorMsg(ctx, "You do not have the SQLInject.exe program!");
-    }
-    if (!server.sqlPortOpen) {
-      helpers.log(ctx, () => `Executed SQLInject.exe on '${server.hostname}' to open SQL port (1433).`);
-      server.sqlPortOpen = true;
-      ++server.openPortCount;
-    } else {
-      helpers.log(ctx, () => `SQL Port (1433) already opened on '${server.hostname}'.`);
-    }
-    return true;
-  },
+      
+    },
+    brutessh: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (!Player.hasProgram(CompletedProgramName.bruteSsh)) {
+        helpers.log(ctx,() => "You do not have the BruteSSH.exe program!");
+        return false;
+      }
+      if (!server.sshPortOpen) {
+        helpers.log(ctx, () => `Executed BruteSSH.exe on '${server.hostname}' to open SSH port (22).`);
+        server.sshPortOpen = true;
+        ++server.openPortCount;
+        return true;
+      } else {
+        helpers.log(ctx, () => `SSH Port (22) already opened on '${server.hostname}'.`);
+        return true;
+      }
+    },
+    ftpcrack: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (!Player.hasProgram(CompletedProgramName.ftpCrack)) {
+        helpers.log(ctx, () => "You do not have the FTPCrack.exe program!");
+        return false;
+      }
+      if (!server.ftpPortOpen) {
+        helpers.log(ctx, () => `Executed FTPCrack.exe on '${server.hostname}' to open FTP port (21).`);
+        server.ftpPortOpen = true;
+        ++server.openPortCount;
+        return true;
+      } else {
+        helpers.log(ctx, () => `FTP Port (21) already opened on '${server.hostname}'.`);
+        return true;
+      }
+    },
+    relaysmtp: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (!Player.hasProgram(CompletedProgramName.relaySmtp)) {
+        helpers.log(ctx, () => "You do not have the relaySMTP.exe program!");
+        return false;
+      }
+      if (!server.smtpPortOpen) {
+        helpers.log(ctx, () => `Executed relaySMTP.exe on '${server.hostname}' to open SMTP port (25).`);
+        server.smtpPortOpen = true;
+        ++server.openPortCount;
+        return true;
+      } else {
+        helpers.log(ctx, () => `SMTP Port (25) already opened on '${server.hostname}'.`);
+        return true;
+      }
+    },
+    httpworm: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (!Player.hasProgram(CompletedProgramName.httpWorm)) {
+        helpers.log(ctx, () => "You do not have the HTTPWorm.exe program!");
+        return false;
+      }
+      if (!server.httpPortOpen) {
+        helpers.log(ctx, () => `Executed HTTPWorm.exe on '${server.hostname}' to open HTTP port (80).`);
+        server.httpPortOpen = true;
+        ++server.openPortCount;
+        return true;
+      } else {
+        helpers.log(ctx, () => `HTTP Port (80) already opened on '${server.hostname}'.`);
+        return true;
+      }
+    },
+    sqlinject: (ctx) => (_hostname) => {
+      const hostname = helpers.string(ctx, "hostname", _hostname);
+      const server = helpers.getServer(ctx, hostname);
+      if (!(server instanceof Server)) {
+        helpers.log(ctx, () => "Cannot be executed on this server.");
+        return false;
+      }
+      if (!Player.hasProgram(CompletedProgramName.sqlInject)) {
+        helpers.log(ctx, () =>"You do not have the SQLInject.exe program!");
+        return false;
+      }
+      if (!server.sqlPortOpen) {
+        helpers.log(ctx, () => `Executed SQLInject.exe on '${server.hostname}' to open SQL port (1433).`);
+        server.sqlPortOpen = true;
+        ++server.openPortCount;
+        return true;
+      } else {
+        helpers.log(ctx, () => `SQL Port (1433) already opened on '${server.hostname}'.`);
+        return true;
+      }
+    },
   run:
     (ctx) =>
     (_scriptname, _thread_or_opt = 1, ..._args) => {
